@@ -1,9 +1,40 @@
-# coregarden
+# Core Garden
 
 Higher level storage provider for hypercore based data structures
 
+### Usage
+```js
+const RAM = require('random-access-memory')
+const memdb = require('memdb')
 
-# API
+const hypercore = require('hypercore')
+const hypertrie = require('hypertrie')
+const hyperdrive = require('hyperdrive')
+
+const Garden = require('coregarden')
+
+
+const garden = Garden(RAM, memdb(), {
+  mappers: {
+    hypercore,
+    hypertrie,
+    hyperdrive
+  }
+})
+
+try {
+  const myTrie = await garden.plant('hypertrie')
+
+  const meta = await garden.getMeta(myTrie.key)
+  console.log(meta)
+
+  await garden.closeCore(mTrie)
+} catch (err) {
+  console.error('Something went wrong', err)
+}
+```
+
+### API
 
 #### `Garden(storage, lvl, opts = {})`
 
@@ -21,7 +52,7 @@ example:
 }
 ```
 
-#### `Garden#registerType(type, factoryFn)
+#### `Garden#registerType(type, factoryFn)`
 
 Appends type and factory function to internal mappers.
 
@@ -145,7 +176,7 @@ creates the core.
 
 `resolve()` Resolves known keys into core references.
 
-Example how to replicate cores in stored in Garden:
+Example how to replicate cores stored in Garden:
 
 ```js
 const replic8 = require('replic8')
@@ -157,6 +188,6 @@ const stream = stack.replicate()
 ```
 
 
-## License
+### License
 
 GNU LGPL 3.0
