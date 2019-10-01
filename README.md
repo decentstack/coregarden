@@ -82,7 +82,7 @@ returns Promise of a core's total size on storage in bytes
 returns Promise that is either resolved or will be resolved
 as soon as metadata is persisted to disc.
 
-#### `Garden#plant(type, [key, ...coreopts] | [manualPlantFn])
+#### `Garden#plant(type, [key, ...coreopts] | [manualPlantFn])`
 
 Allocates a new storage space `pot` for given `type`.
 
