@@ -450,7 +450,7 @@ class CoreGarden {
   }
 
   /*
-   * Replic8 middleware support
+   * Decentstack middleware support
    */
   async share (next) {
     const list = await this.listCores().catch(next)
@@ -468,7 +468,7 @@ class CoreGarden {
     }
   }
 
-  async accept ({ key, meta, resolve }, next) {
+  async store ({ key, meta }, next) {
     let core
     try {
       core = await this.get(key)

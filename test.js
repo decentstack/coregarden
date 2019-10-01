@@ -5,6 +5,7 @@ const memdb = require('memdb')
 const level = require('level')
 const test = require('tape')
 const hypercore = require('hypercore')
+const { Decentstack } = require('decentstack')
 const { join } = require('path')
 // const Dat = require('dat-node')
 // const Passport = require('decentpass') // TODO: release it.
@@ -69,6 +70,45 @@ test('garden experimental core store', async t => {
   t.end()
 })
 
+test('middleware: shares cores', async t => {
+  t.plan(2)
+  const garden = Garden(RAM, memdb(), {
+    mappers: { hypercore }
+  })
+
+  const feed = await garden.plant('hypercore').catch(t.error)
+  const stack = new Decentstack(feed.key)
+  stack.use(garden)
+  const { keys, meta } = await stack.snapshot().catch(t.error)
+  t.equal(meta[0].origin, 'garden')
+  t.equal(meta[0].type, 'hypercore')
+  t.end()
+})
+
+
+test('middleware: accepts cores', async t => {
+  const garden = Garden(RAM, memdb(), {
+    mappers: { hypercore }
+  })
+
+  const feed = hypercore(RAM)
+  await defer(d => feed.ready(d))
+
+  const stack = new Decentstack(feed.key)
+  stack.use(garden)
+
+  const accepted = await stack.accept({
+    keys: [feed.key.toString('hex')], meta: [{ origin: 'garden', type: 'hypercore' }]
+  })
+  t.equal(accepted.keys.length, 1)
+  const cores = await stack.store(accepted)
+  t.equal(cores.length, 1)
+  const list = await garden.listCores()
+  t.equal(list.length, 1)
+  t.ok(list[0].key, feed.key.toString('hex'))
+  t.end()
+})
+
 const prefix = './mock_root'
 const makeFileStore = async (purge = false) => {
   if (purge) await destroyFileStore()
@@ -86,7 +126,7 @@ const destroyFileStore = () => {
 
 // TODO: Skipped until decentpass is released
 // which is sad since this is a pretty extensive and useful
-// test.
+// test. maybe replace all instances of pass with trie
 test.skip('Open and close with real FS', async t => {
   t.plan(22)
   try {
